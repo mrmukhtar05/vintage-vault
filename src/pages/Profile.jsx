@@ -1,0 +1,2 @@
+import { Link } from "react-router-dom";
+export default function Profile(){return <main className="mx-auto max-w-[900px] px-5 py-20"><h1 className="text-5xl font-black">MY PROFILE</h1><div className="mt-8 border border-[var(--border)] bg-[var(--surface)] p-8"><p className="text-[var(--muted)]">Profile information will be connected to the backend later.</p><Link to="/orders" className="mt-6 inline-block text-[var(--gold)]">View Orders →</Link></div></main>}

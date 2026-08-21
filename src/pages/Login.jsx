@@ -1,0 +1,2 @@
+import { Link } from "react-router-dom";
+export default function Login(){return <main className="mx-auto max-w-md px-5 py-20"><h1 className="text-5xl font-black">LOGIN</h1><form className="mt-8 grid gap-4"><input className="bg-[var(--surface)] p-4" placeholder="Email"/><input className="bg-[var(--surface)] p-4" type="password" placeholder="Password"/><button className="bg-[var(--gold)] p-4 font-black text-black">LOGIN</button></form><p className="mt-6 text-sm text-[var(--muted)]">New here? <Link className="text-[var(--gold)]" to="/register">Create account</Link></p></main>}

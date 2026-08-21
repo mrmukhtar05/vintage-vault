@@ -1,243 +1,291 @@
-const categories = [
-  {
-    name: "JORTS",
-    color: "bg-[#b72f2f]",
-    emoji: "🩳",
-  },
-  {
-    name: "GRAILS",
-    color: "bg-[#063c5c]",
-    emoji: "🧥",
-  },
-  {
-    name: "BOTTOMS",
-    color: "bg-[#c28a18]",
-    emoji: "👖",
-  },
-  {
-    name: "JERSEYS",
-    color: "bg-[#0b4265]",
-    emoji: "🏀",
-  },
-];
+import { useRef } from "react";
+import { Link } from "react-router-dom";
+import logo from "../assets/logo.png";
+import { products } from "../data/products";
+import ProductCard from "../components/ProductCard";
 
-const products = [
-  {
-    name: "Eminem Vintage Tee",
-    price: "₹1,799",
-    emoji: "👕",
-  },
-  {
-    name: "Vintage Racing Jacket",
-    price: "₹4,499",
-    emoji: "🧥",
-  },
-  {
-    name: "Lakers Champion Hoodie",
-    price: "₹2,999",
-    emoji: "👕",
-  },
-  {
-    name: "2PAC Vintage Tee",
-    price: "₹1,999",
-    emoji: "👕",
-  },
-  {
-    name: "Vintage Varsity Jacket",
-    price: "₹3,499",
-    emoji: "🧥",
-  },
+const categories = [
+  ["JORTS", "🩳", "bg-[#b72f2f]"],
+  ["GRAILS", "🧥", "bg-[#063c5c]"],
+  ["BOTTOMS", "👖", "bg-[#c28a18]"],
+  ["JERSEYS", "🏀", "bg-[#0b4265]"],
 ];
 
 export default function Home() {
+  const trackRef = useRef(null);
+
+  const scrollProducts = (dir) => {
+    const el = trackRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * (el.clientWidth * 0.8), behavior: "smooth" });
+  };
+
   return (
-    <main className="overflow-hidden">
+    <main>
+      {/* local keyframes for the marquee + fade edges */}
+      <style>{`
+        @keyframes marquee-scroll {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+        .marquee-track {
+          animation: marquee-scroll 22s linear infinite;
+        }
+        .marquee-wrap:hover .marquee-track {
+          animation-play-state: paused;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .marquee-track { animation: none; }
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-      {/* ================= HERO ================= */}
+        @keyframes border-spin {
+          to { --angle: 360deg; }
+        }
+        @property --angle {
+          syntax: '<angle>';
+          initial-value: 0deg;
+          inherits: false;
+        }
+        .cat-card {
+          position: relative;
+          z-index: 0;
+        }
+        .cat-card::before {
+          content: "";
+          position: absolute;
+          inset: -2px;
+          z-index: -1;
+          border-radius: inherit;
+          padding: 2px;
+          background: conic-gradient(from var(--angle), #e9a91a, #d83b32, #063c5c, #e9a91a);
+          -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          animation: border-spin 3s linear infinite;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+        .cat-card:hover::before {
+          opacity: 1;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .cat-card::before { animation: none; }
+        }
+      `}</style>
 
-      <section className="relative min-h-[590px] overflow-hidden bg-[var(--black)] sm:min-h-[650px] lg:min-h-[690px]">
-
-        {/* BACKGROUND STAR */}
-        <div className="absolute right-[5%] top-[8%] hidden h-[500px] w-[650px] rotate-6 rounded-[45%] bg-[var(--blue)] opacity-80 lg:block" />
-
-        <div className="absolute right-[25%] top-[10%] hidden h-[400px] w-[400px] rotate-12 bg-[var(--red)] opacity-80 [clip-path:polygon(50%_0%,61%_35%,98%_35%,68%_57%,79%_95%,50%_72%,21%_95%,32%_57%,2%_35%,39%_35%)] lg:block" />
-
-        <div className="relative mx-auto grid min-h-[590px] max-w-[1500px] items-center px-6 py-16 sm:px-10 lg:min-h-[690px] lg:grid-cols-2 lg:px-20">
-
-          {/* LEFT */}
-          <div className="relative z-10 max-w-[600px]">
-
-            <p className="mb-5 text-xs font-black tracking-[0.25em] text-[var(--gold)] sm:text-sm">
-              VINTAGE • STREETWEAR • GRAILS
-            </p>
-
-            <h1 className="text-6xl font-black uppercase leading-[0.85] tracking-[-0.05em] text-[var(--cream)] sm:text-8xl lg:text-[92px] xl:text-[110px]">
-
-              WEAR THE
-
-              <br />
-
-              <span className="text-[var(--gold)]">
-                PAST.
-              </span>
-
+      <section className="relative overflow-hidden border-b-2 border-[var(--gold)] bg-[#080a0b]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_50%,#063c5c_0%,#080a0b_50%,#080a0b_100%)]" />
+        <div className="absolute right-[-180px] top-[80px] hidden h-[420px] w-[760px] rotate-[-12deg] rounded-[50%] border-[14px] border-[#0b4265] lg:block" />
+        <div className="absolute right-[-170px] top-[72px] hidden h-[430px] w-[770px] rotate-[-12deg] rounded-[50%] border-2 border-[#e9a91a] lg:block" />
+        <div className="relative z-10 mx-auto grid min-h-[650px] max-w-[1500px] items-center px-6 py-16 sm:px-10 lg:grid-cols-2 lg:px-16">
+          <div className="max-w-[620px]">
+            <div className="mb-6 flex items-center gap-3">
+              <span className="h-[2px] w-10 bg-[#e9a91a]" />
+              <p className="text-xs font-black tracking-[0.3em] text-[#e9a91a]">VINTAGE • STREETWEAR • GRAILS</p>
+            </div>
+            <h1 className="text-6xl font-black uppercase leading-[0.82] tracking-[-0.05em] sm:text-8xl lg:text-[88px] xl:text-[105px]">
+              WEAR THE<br /><span className="text-[#e9a91a]">PAST.</span>
             </h1>
+            <p className="mt-8 max-w-[450px] text-sm leading-7 text-[#d5cbb9] sm:text-base">
+              Curated vintage pieces, rare streetwear and timeless grails for people who wear their own story.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Link to="/shop" className="border-2 border-black bg-[#d83b32] px-7 py-4 font-black text-black shadow-[5px_5px_0_#e9a91a] hover:translate-x-1 hover:translate-y-1 hover:shadow-none">SHOP NOW →</Link>
+              <Link to="/categories" className="border-2 border-[#e9a91a] px-7 py-4 font-black text-[#e9a91a] hover:bg-[#e9a91a] hover:text-black">EXPLORE</Link>
+            </div>
+            <div className="mt-10 flex gap-7 border-t border-white/10 pt-6">
+              <div><b className="text-xl text-[#e9a91a]">3K+</b><p className="text-[10px] text-[#aaa69b]">PIECES</p></div>
+              <div><b className="text-xl text-[#e9a91a]">100%</b><p className="text-[10px] text-[#aaa69b]">CURATED</p></div>
+              <div><b className="text-xl text-[#e9a91a]">2021</b><p className="text-[10px] text-[#aaa69b]">EST.</p></div>
+            </div>
+          </div>
+          <div className="relative hidden h-[500px] items-center justify-center lg:flex">
+            <div className="absolute h-[400px] w-[500px] rounded-full bg-[#063c5c] opacity-40 blur-3xl" />
+            <img src={logo} alt="Vintage Vault" className="relative z-10 w-[520px] object-contain drop-shadow-[0_25px_35px_rgba(0,0,0,.8)] hover:scale-105 transition-transform" />
+          </div>
+          <div className="mt-12 flex justify-center lg:hidden">
+            <img src={logo} alt="Vintage Vault" className="w-[280px] object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,.8)]" />
+          </div>
+        </div>
+      </section>
 
-            <p className="mt-7 max-w-[430px] text-sm leading-6 text-[#d2c9b6] sm:text-base">
-              Curated vintage pieces for people who wear their own story.
+      {/* CATEGORY MARQUEE */}
+    {/* ================= CATEGORIES ================= */}
+<section className="overflow-hidden bg-[var(--blue)] py-16">
+
+  <div className="mx-auto max-w-[1400px] px-5 sm:px-8 lg:px-12">
+
+    <p className="text-xs font-black tracking-[0.3em] text-[var(--gold)]">
+      EXPLORE COLLECTIONS
+    </p>
+
+    <div className="flex items-end justify-between gap-4">
+      <h2 className="mt-2 text-4xl font-black uppercase sm:text-5xl">
+        SHOP BY CATEGORY
+      </h2>
+    </div>
+
+  </div>
+
+  {/* Moving Categories */}
+  <div className="relative mt-10 overflow-hidden">
+
+    <div className="category-track flex w-max gap-5">
+
+      {[
+        ["JORTS", "bg-[#8f2828]"],
+        ["GRAILS", "bg-[#073b59]"],
+        ["BOTTOMS", "bg-[#a87313]"],
+        ["JERSEYS", "bg-[#0a496e]"],
+        ["HOODIES", "bg-[#352719]"],
+        ["TEES", "bg-[#242424]"],
+        ["JACKETS", "bg-[#173b50]"],
+        ["DENIM", "bg-[#293b4b]"],
+
+        // Duplicate for seamless animation
+        ["JORTS", "bg-[#8f2828]"],
+        ["GRAILS", "bg-[#073b59]"],
+        ["BOTTOMS", "bg-[#a87313]"],
+        ["JERSEYS", "bg-[#0a496e]"],
+        ["HOODIES", "bg-[#352719]"],
+        ["TEES", "bg-[#242424]"],
+        ["JACKETS", "bg-[#173b50]"],
+        ["DENIM", "bg-[#293b4b]"],
+      ].map(([name, bg], index) => (
+
+        <Link
+          to="/shop"
+          key={`${name}-${index}`}
+          className={`
+            group
+            relative
+            h-[220px]
+            w-[280px]
+            shrink-0
+            overflow-hidden
+            border-2
+            border-[var(--gold)]
+            ${bg}
+            transition-all
+            duration-500
+            hover:-translate-y-3
+            hover:shadow-[8px_8px_0_#000]
+          `}
+        >
+
+          {/* Logo */}
+          <div className="absolute inset-0 flex items-center justify-center">
+
+            <img
+              src={logo}
+              alt="Vintage Vault"
+              className="
+                w-[170px]
+                object-contain
+                opacity-25
+                transition-all
+                duration-700
+                group-hover:scale-125
+                group-hover:rotate-6
+                group-hover:opacity-50
+              "
+            />
+
+          </div>
+
+          {/* Overlay */}
+          <div
+            className="
+              absolute
+              inset-0
+              bg-black/30
+              transition-all
+              duration-500
+              group-hover:bg-black/10
+            "
+          />
+
+          {/* Text */}
+          <div className="absolute bottom-0 left-0 right-0 p-5">
+
+            <p className="text-[10px] font-bold tracking-[0.3em] text-white/70">
+              VINTAGE VAULT
             </p>
 
-            <button className="group relative mt-8 border-2 border-black bg-[var(--red)] px-8 py-4 font-black uppercase tracking-wide text-black shadow-[4px_4px_0_var(--gold)] transition hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
-              SHOP NOW
-              <span className="ml-5 text-xl transition group-hover:ml-7">
-                →
-              </span>
-            </button>
+            <h3
+              className="
+                mt-1
+                text-3xl
+                font-black
+                italic
+                tracking-tight
+                text-white
+                transition-transform
+                duration-500
+                group-hover:translate-x-3
+              "
+            >
+              {name}
+            </h3>
+
+            <span
+              className="
+                mt-2
+                inline-block
+                text-xs
+                font-black
+                text-[var(--gold)]
+                opacity-0
+                transition-all
+                duration-500
+                group-hover:translate-x-3
+                group-hover:opacity-100
+              "
+            >
+              SHOP NOW →
+            </span>
 
           </div>
 
-          {/* RIGHT PRODUCT VISUAL */}
-          <div className="relative mt-10 hidden h-[500px] lg:block">
+        </Link>
 
-            {/* Blue oval */}
-            <div className="absolute right-0 top-20 h-[280px] w-[520px] rotate-[-8deg] rounded-[50%] border-4 border-[var(--gold)] bg-[#145273]" />
+      ))}
 
-            {/* Red star */}
-            <div className="absolute right-40 top-0 h-[420px] w-[420px] rotate-12 bg-[var(--red)] [clip-path:polygon(50%_0%,61%_35%,98%_35%,68%_57%,79%_95%,50%_72%,21%_95%,32%_57%,2%_35%,39%_35%)]" />
+    </div>
 
-            {/* T-shirt */}
-            <div className="absolute right-[220px] top-[60px] z-10 flex h-[330px] w-[250px] rotate-[-7deg] items-center justify-center rounded-t-[35%] bg-[#191919] text-5xl font-black text-[var(--gold)] shadow-2xl">
-              NIRVANA
-            </div>
+  </div>
 
-            {/* Jersey */}
-            <div className="absolute right-0 top-[100px] z-20 flex h-[350px] w-[240px] rotate-[7deg] items-center justify-center rounded-t-[25%] border-4 border-black bg-[#151515] text-6xl font-black text-[#d52d2d] shadow-2xl">
-              91
-            </div>
+</section>
 
-            {/* Shoes */}
-            <div className="absolute bottom-5 right-[100px] z-30 text-[130px]">
-              👟
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ================= CATEGORIES ================= */}
-
-      <section className="border-t-2 border-[var(--gold)] bg-[var(--blue)] px-5 py-12 sm:px-8 lg:px-12">
-
-        <div className="mx-auto max-w-[1400px]">
-
-          <p className="text-xs font-black tracking-[0.25em] text-[var(--gold)]">
-            EXPLORE
-          </p>
-
-          <div className="mb-8 flex items-end justify-between">
-
-            <h2 className="text-4xl font-black uppercase tracking-tight text-[var(--cream)] sm:text-5xl">
-              SHOP BY CATEGORY
-            </h2>
-
-            <div className="hidden gap-3 sm:flex">
-              <button className="h-10 w-10 rounded-full border border-[var(--gold)] text-xl hover:bg-[var(--gold)] hover:text-black">
-                ←
-              </button>
-
-              <button className="h-10 w-10 rounded-full border border-[var(--gold)] text-xl hover:bg-[var(--gold)] hover:text-black">
-                →
-              </button>
-            </div>
-
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-5">
-
-            {categories.map((category) => (
-              <div
-                key={category.name}
-                className={`group relative flex h-[180px] cursor-pointer items-end overflow-hidden rounded-md border-2 border-[var(--gold)] ${category.color} p-4 transition hover:-translate-y-1 sm:h-[230px] lg:h-[250px]`}
-              >
-
-                <div className="absolute inset-0 flex items-center justify-center text-[90px] opacity-70 transition group-hover:scale-110">
-                  {category.emoji}
-                </div>
-
-                <h3 className="relative z-10 text-3xl font-black uppercase italic tracking-tight text-[var(--cream)] drop-shadow-[3px_3px_0_#000] sm:text-4xl">
-                  {category.name}
-                </h3>
-
-              </div>
-            ))}
-
-          </div>
-        </div>
-      </section>
-
-      {/* ================= PRODUCTS ================= */}
-
+      {/* PRODUCT CAROUSEL */}
       <section className="bg-[var(--black)] px-5 py-14 sm:px-8 lg:px-12">
+  <div className="mx-auto max-w-[1400px]">
 
-        <div className="mx-auto max-w-[1400px]">
+    {/* Heading */}
+    <div>
+      <p className="text-xs font-black tracking-[0.25em] text-[var(--gold)]">
+        CURATED FOR YOU
+      </p>
 
-          <div className="flex items-end justify-between">
+      <h2 className="mt-2 text-4xl font-black uppercase sm:text-5xl">
+        TRENDING GRAILS
+      </h2>
+    </div>
 
-            <div>
-              <p className="text-xs font-black tracking-[0.25em] text-[var(--gold)]">
-                CURATED FOR YOU
-              </p>
+    {/* Products */}
+    <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {products.slice(0, 8).map((p) => (
+        <ProductCard
+          key={p.id}
+          product={p}
+        />
+      ))}
+    </div>
 
-              <h2 className="mt-2 text-4xl font-black uppercase text-[var(--cream)] sm:text-5xl">
-                TRENDING GRAILS
-              </h2>
-            </div>
-
-            <button className="hidden font-bold text-[var(--gold)] sm:block">
-              VIEW ALL →
-            </button>
-
-          </div>
-
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-
-            {products.map((product) => (
-              <div
-                key={product.name}
-                className="group overflow-hidden rounded-md bg-[#eee6d5] text-black"
-              >
-
-                <div className="relative flex h-[230px] items-center justify-center overflow-hidden bg-[#e9e1d1] sm:h-[280px]">
-
-                  <button className="absolute right-3 top-3 z-10 text-2xl text-black">
-                    ♡
-                  </button>
-
-                  <span className="text-[90px] transition duration-300 group-hover:scale-110">
-                    {product.emoji}
-                  </span>
-
-                </div>
-
-                <div className="p-3 sm:p-4">
-
-                  <h3 className="truncate text-xs font-bold sm:text-sm">
-                    {product.name}
-                  </h3>
-
-                  <p className="mt-1 text-sm font-black text-[#d08c0b]">
-                    {product.price}
-                  </p>
-
-                </div>
-
-              </div>
-            ))}
-
-          </div>
-        </div>
-      </section>
-
+  </div>
+</section>
     </main>
   );
 }

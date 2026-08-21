@@ -1,0 +1,2 @@
+import { Link } from "react-router-dom";
+export default function Wishlist(){return <main className="mx-auto max-w-[1000px] px-5 py-20"><h1 className="text-5xl font-black">WISHLIST</h1><div className="mt-10 border border-[var(--border)] bg-[var(--surface)] p-8 text-center"><p className="text-[var(--muted)]">No saved products yet.</p><Link to="/shop" className="mt-6 inline-block bg-[var(--gold)] px-7 py-4 font-black text-black">EXPLORE SHOP</Link></div></main>}

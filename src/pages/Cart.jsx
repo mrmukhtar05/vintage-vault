@@ -1,0 +1,2 @@
+import { Link } from "react-router-dom";
+export default function Cart(){return <main className="mx-auto max-w-[1000px] px-5 py-20"><h1 className="text-5xl font-black">YOUR CART</h1><div className="mt-10 border border-[var(--border)] bg-[var(--surface)] p-8 text-center"><p className="text-[var(--muted)]">Your cart is empty.</p><Link to="/shop" className="mt-6 inline-block bg-[var(--gold)] px-7 py-4 font-black text-black">START SHOPPING</Link></div></main>}
