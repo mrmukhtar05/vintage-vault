@@ -34,12 +34,37 @@ export default function Navbar() {
 
   return (
     <>
-      {/* ================= TOP MARQUEE ================= */}
-      <div className="hidden overflow-hidden border-b border-[var(--border)] bg-black px-6 py-2 text-xs md:block">
-        <div className="flex w-max animate-marquee items-center">
-          {/* First */}
+
+      <div className="marquee-wrap hidden overflow-hidden border-b border-[var(--border)] bg-black px-6 py-2 text-xs md:block">
+        <style>{` 
+    @keyframes marquee-move { 
+      from { 
+        transform: translateX(0); 
+      } 
+      to { 
+        transform: translateX(-50%); 
+      } 
+    } 
+ 
+    .animate-marquee { 
+      animation: marquee-move 10s linear infinite; 
+    } 
+ 
+    .marquee-wrap:hover .animate-marquee { 
+      animation-play-state: paused; 
+    } 
+ 
+    @media (prefers-reduced-motion: reduce) { 
+      .animate-marquee { 
+        animation: none; 
+      } 
+    } 
+  `}</style>
+
+        <div className="animate-marquee flex items-center justify-between ">
+          {/* First content */}
           <div className="flex shrink-0 items-center gap-6 pr-20">
-            <span className="whitespace-nowrap font-black">
+            <span className="font-black whitespace-nowrap">
               🚚 FREE SHIPPING ABOVE ₹1999
             </span>
 
@@ -50,9 +75,9 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Duplicate */}
+          {/* Exact duplicate */}
           <div className="flex shrink-0 items-center gap-6 pr-20">
-            <span className="whitespace-nowrap font-black">
+            <span className="font-black whitespace-nowrap">
               🚚 FREE SHIPPING ABOVE ₹1999
             </span>
 
@@ -64,6 +89,7 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+
 
       {/* ================= NAVBAR ================= */}
       <header className="sticky top-0 z-50 border-b-2 border-[var(--gold)] bg-[var(--blue)]">
@@ -87,11 +113,10 @@ export default function Navbar() {
                 <Link
                   key={name}
                   to={path}
-                  className={`relative text-sm font-black tracking-wider transition-colors duration-300 ${
-                    active
+                  className={`relative text-sm font-black tracking-wider transition-colors duration-300 ${active
                       ? "text-[var(--gold)]"
                       : "text-[var(--cream)] hover:text-[var(--gold)]"
-                  }`}
+                    }`}
                 >
                   {name}
 
@@ -117,11 +142,10 @@ export default function Navbar() {
             {/* Wishlist */}
             <Link
               to="/wishlist"
-              className={`relative text-2xl transition-colors ${
-                isActive("/wishlist")
+              className={`relative text-2xl transition-colors ${isActive("/wishlist")
                   ? "text-[var(--gold)]"
                   : "hover:text-[var(--gold)]"
-              }`}
+                }`}
             >
               ♡
 
@@ -135,11 +159,10 @@ export default function Navbar() {
             {/* Cart */}
             <Link
               to="/cart"
-              className={`relative text-2xl transition-colors ${
-                isActive("/cart")
+              className={`relative text-2xl transition-colors ${isActive("/cart")
                   ? "text-[var(--gold)]"
                   : "hover:text-[var(--gold)]"
-              }`}
+                }`}
             >
               🛒
 
@@ -154,11 +177,10 @@ export default function Navbar() {
                 {isAdmin && (
                   <Link
                     to="/admin"
-                    className={`border px-4 py-2 text-xs font-bold transition ${
-                      isActive("/admin")
+                    className={`border px-4 py-2 text-xs font-bold transition ${isActive("/admin")
                         ? "border-[var(--red)] bg-[var(--red)] text-white"
                         : "border-[var(--red)] text-[var(--red)] hover:bg-[var(--red)] hover:text-white"
-                    }`}
+                      }`}
                   >
                     DASHBOARD
                   </Link>
@@ -166,11 +188,10 @@ export default function Navbar() {
 
                 <Link
                   to="/profile"
-                  className={`text-xs font-bold transition ${
-                    isActive("/profile")
+                  className={`text-xs font-bold transition ${isActive("/profile")
                       ? "text-[var(--gold)]"
                       : "text-[var(--cream)] hover:text-[var(--gold)]"
-                  }`}
+                    }`}
                 >
                   HI, {user.name.split(" ")[0].toUpperCase()}
                 </Link>
@@ -185,11 +206,10 @@ export default function Navbar() {
             ) : (
               <Link
                 to="/login"
-                className={`border px-4 py-2 text-xs font-bold transition ${
-                  isActive("/login")
+                className={`border px-4 py-2 text-xs font-bold transition ${isActive("/login")
                     ? "bg-[var(--gold)] text-black"
                     : "border-[var(--gold)] hover:bg-[var(--gold)] hover:text-black"
-                }`}
+                  }`}
               >
                 LOGIN
               </Link>
@@ -216,11 +236,10 @@ export default function Navbar() {
                   key={name}
                   to={path}
                   onClick={() => setOpen(false)}
-                  className={`block border-b border-white/10 py-4 text-sm font-black tracking-widest transition-colors ${
-                    active
+                  className={`block border-b border-white/10 py-4 text-sm font-black tracking-widest transition-colors ${active
                       ? "text-[var(--gold)]"
                       : "text-[var(--cream)] hover:text-[var(--gold)]"
-                  }`}
+                    }`}
                 >
                   {name}
                 </Link>
@@ -242,9 +261,8 @@ export default function Navbar() {
               <Link
                 to="/wishlist"
                 onClick={() => setOpen(false)}
-                className={`relative text-xl ${
-                  isActive("/wishlist") ? "text-[var(--gold)]" : ""
-                }`}
+                className={`relative text-xl ${isActive("/wishlist") ? "text-[var(--gold)]" : ""
+                  }`}
               >
                 ♡
 
@@ -259,9 +277,8 @@ export default function Navbar() {
               <Link
                 to="/cart"
                 onClick={() => setOpen(false)}
-                className={`relative text-xl ${
-                  isActive("/cart") ? "text-[var(--gold)]" : ""
-                }`}
+                className={`relative text-xl ${isActive("/cart") ? "text-[var(--gold)]" : ""
+                  }`}
               >
                 🛒
 
@@ -277,11 +294,10 @@ export default function Navbar() {
                     <Link
                       to="/admin"
                       onClick={() => setOpen(false)}
-                      className={`text-xs font-black ${
-                        isActive("/admin")
+                      className={`text-xs font-black ${isActive("/admin")
                           ? "text-[var(--gold)]"
                           : "text-[var(--red)]"
-                      }`}
+                        }`}
                     >
                       DASHBOARD
                     </Link>
@@ -290,11 +306,10 @@ export default function Navbar() {
                   <Link
                     to="/profile"
                     onClick={() => setOpen(false)}
-                    className={`text-xs font-black ${
-                      isActive("/profile")
+                    className={`text-xs font-black ${isActive("/profile")
                         ? "text-[var(--gold)]"
                         : "text-[var(--cream)]"
-                    }`}
+                      }`}
                   >
                     PROFILE
                   </Link>
@@ -310,11 +325,10 @@ export default function Navbar() {
                 <Link
                   to="/login"
                   onClick={() => setOpen(false)}
-                  className={`text-xs font-black ${
-                    isActive("/login")
+                  className={`text-xs font-black ${isActive("/login")
                       ? "text-[var(--gold)]"
                       : "text-[var(--cream)]"
-                  }`}
+                    }`}
                 >
                   LOGIN
                 </Link>
