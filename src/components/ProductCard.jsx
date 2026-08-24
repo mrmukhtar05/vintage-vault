@@ -1,10 +1,16 @@
 import { Link } from "react-router-dom";
+import { useWishlist } from "../context/WishlistContext";
+import ImageSlider from "./ImageSlider";
 
 export default function ProductCard({ product, onWishlist }) {
+  const { toggleWishlist, isWishlisted } = useWishlist();
+  const wishlisted = isWishlisted(product.id);
+
   const handleWishlist = (e) => {
     e.preventDefault();
     e.stopPropagation();
 
+    toggleWishlist(product);
     onWishlist?.(product);
   };
 
@@ -25,24 +31,22 @@ export default function ProductCard({ product, onWishlist }) {
       "
     >
       <Link to={`/product/${product.id}`} className="block">
-        {/* Product Image */}
-        <div
-          className={`
-            relative
-            flex
-            h-[340px]
-            items-center
-            justify-center
-            overflow-hidden
-            ${product.color}
-          `}
-        >
+        {/* Product Image — aspect-ratio instead of fixed px height so it
+            scales cleanly with the grid column width on any screen size */}
+        <div className="relative aspect-[4/5] w-full overflow-hidden">
+          <ImageSlider
+            images={product.images}
+            emojiSize="text-[min(28vw,130px)] drop-shadow-[0_15px_15px_rgba(0,0,0,0.5)] transition-all duration-700 ease-out group-hover:scale-125 group-hover:-rotate-3"
+          />
+
           {/* Shine Animation */}
           <div
             className="
+              pointer-events-none
               absolute
               -left-[100%]
               top-0
+              z-10
               h-full
               w-[60%]
               rotate-12
@@ -57,8 +61,8 @@ export default function ProductCard({ product, onWishlist }) {
           <button
             type="button"
             onClick={handleWishlist}
-            aria-label={`Add ${product.name} to wishlist`}
-            className="
+            aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+            className={`
               absolute
               right-4
               top-4
@@ -69,38 +73,20 @@ export default function ProductCard({ product, onWishlist }) {
               items-center
               justify-center
               rounded-full
-              bg-black/50
               text-2xl
-              text-white
               transition-all
               duration-300
               hover:scale-110
-              hover:bg-[var(--red)]
-            "
+              ${wishlisted ? "bg-[var(--red)] text-white" : "bg-black/50 text-white hover:bg-[var(--red)]"}
+            `}
           >
-            ♡
+            {wishlisted ? "♥" : "♡"}
           </button>
-
-          {/* Product */}
-          <span
-            className="
-              relative
-              z-10
-              text-[130px]
-              drop-shadow-[0_15px_15px_rgba(0,0,0,0.5)]
-              transition-all
-              duration-700
-              ease-out
-              group-hover:scale-125
-              group-hover:-rotate-3
-            "
-          >
-            {product.emoji}
-          </span>
 
           {/* Quick View */}
           <div
             className="
+              pointer-events-none
               absolute
               bottom-5
               left-1/2
@@ -126,7 +112,7 @@ export default function ProductCard({ product, onWishlist }) {
         </div>
 
         {/* Product Info */}
-        <div className="p-6">
+        <div className="p-5 sm:p-6">
           {/* Category */}
           <p
             className="
@@ -145,11 +131,12 @@ export default function ProductCard({ product, onWishlist }) {
             className="
               mt-2
               truncate
-              text-xl
+              text-lg
               font-black
               transition-colors
               duration-300
               group-hover:text-[#c88b12]
+              sm:text-xl
             "
           >
             {product.name}
@@ -157,7 +144,7 @@ export default function ProductCard({ product, onWishlist }) {
 
           {/* Price */}
           <div className="mt-3 flex items-center gap-3">
-            <span className="text-lg font-black text-[#d08c0b]">
+            <span className="text-base font-black text-[#d08c0b] sm:text-lg">
               ₹{product.price}
             </span>
 

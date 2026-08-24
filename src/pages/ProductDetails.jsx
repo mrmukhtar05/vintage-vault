@@ -1,13 +1,184 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { products } from "../data/products";
+import { useProducts } from "../context/ProductsContext";
+import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
+import ImageSlider from "../components/ImageSlider";
 
-export default function ProductDetails(){
-  const {id}=useParams();
-  const product=products.find(p=>p.id===Number(id));
-  if(!product)return <div className="p-20 text-center"><h1 className="text-4xl font-black">Product Not Found</h1></div>;
+export default function ProductDetails() {
+  const { id } = useParams();
+  const { getProduct } = useProducts();
+  const product = getProduct(id);
 
-  return <main className="mx-auto grid max-w-[1200px] gap-10 px-5 py-14 lg:grid-cols-2">
-    <div className={`flex h-[550px] items-center justify-center ${product.color}`}><span className="text-[180px]">{product.emoji}</span></div>
-    <div className="py-5"><p className="text-xs font-bold text-[var(--gold)]">{product.category}</p><h1 className="mt-3 text-5xl font-black">{product.name}</h1><p className="mt-6 text-3xl font-black text-[var(--gold)]">₹{product.price}</p><p className="mt-5 leading-7 text-[var(--muted)]">A curated vintage piece in {product.condition.toLowerCase()} condition. Size: {product.size}.</p><button className="mt-8 w-full bg-[var(--gold)] px-6 py-4 font-black text-black hover:opacity-90">ADD TO CART</button><Link to="/shop" className="mt-4 block text-center text-sm text-[var(--gold)]">← Continue Shopping</Link></div>
-  </main>;
+  const { addToCart } = useCart();
+  const { toggleWishlist, isWishlisted } = useWishlist();
+
+  const [qty, setQty] = useState(1);
+  const [added, setAdded] = useState(false);
+
+  if (!product) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center px-5 text-center">
+        <div>
+          <h1 className="text-4xl font-black">Product Not Found</h1>
+
+          <Link
+            to="/shop"
+            className="mt-6 inline-block text-[var(--gold)] hover:underline"
+          >
+            ← Back to Shop
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const wishlisted = isWishlisted(product.id);
+
+  const handleAddToCart = () => {
+    addToCart(product, qty);
+    setAdded(true);
+
+    setTimeout(() => {
+      setAdded(false);
+    }, 2000);
+  };
+
+  return (
+    <main className="mx-auto w-full max-w-[1500px] px-5 py-10 sm:px-8 sm:py-14 lg:px-12">
+      <div className="grid gap-10 lg:grid-cols-2 lg:gap-14 xl:gap-20">
+        {/* =====================================================
+            PRODUCT IMAGE
+        ===================================================== */}
+        <div className="w-full">
+          <div className="relative aspect-square w-full overflow-hidden border border-[var(--border)] bg-[var(--surface)] sm:aspect-[4/5] lg:aspect-[4/5] xl:max-h-[680px]">
+            <ImageSlider
+              images={product.images}
+              emojiSize="text-[180px]"
+              showCount
+            />
+          </div>
+        </div>
+
+        {/* =====================================================
+            PRODUCT INFO
+        ===================================================== */}
+        <div className="flex flex-col justify-center py-2 lg:py-8">
+          {/* Category */}
+          <p className="text-xs font-black uppercase tracking-[0.25em] text-[var(--gold)]">
+            {product.category}
+          </p>
+
+          {/* Product Name */}
+          <h1 className="mt-3 text-4xl font-black uppercase leading-tight sm:text-5xl xl:text-6xl">
+            {product.name}
+          </h1>
+
+          {/* Price */}
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <p className="text-3xl font-black text-[var(--gold)] sm:text-4xl">
+              ₹{product.price}
+            </p>
+
+            {product.oldPrice && (
+              <p className="text-lg text-[var(--muted)] line-through">
+                ₹{product.oldPrice}
+              </p>
+            )}
+          </div>
+
+          {/* Description */}
+          <p className="mt-6 max-w-[600px] leading-7 text-[var(--muted)]">
+            A curated vintage piece in{" "}
+            <span className="font-bold text-[var(--cream)]">
+              {product.condition.toLowerCase()}
+            </span>{" "}
+            condition.
+          </p>
+
+          {/* Product Meta */}
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:max-w-[500px]">
+            <div className="border border-[var(--border)] p-4">
+              <p className="text-[10px] font-bold tracking-widest text-[var(--muted)]">
+                CONDITION
+              </p>
+
+              <p className="mt-1 font-black">
+                {product.condition}
+              </p>
+            </div>
+
+            <div className="border border-[var(--border)] p-4">
+              <p className="text-[10px] font-bold tracking-widest text-[var(--muted)]">
+                SIZE
+              </p>
+
+              <p className="mt-1 font-black">
+                {product.size}
+              </p>
+            </div>
+          </div>
+
+          {/* Quantity */}
+          <div className="mt-8 flex items-center gap-4">
+            <span className="text-sm font-bold text-[var(--muted)]">
+              QUANTITY
+            </span>
+
+            <div className="flex items-center border border-[var(--border)]">
+              <button
+                onClick={() => setQty((q) => Math.max(1, q - 1))}
+                className="flex h-11 w-11 items-center justify-center text-xl font-black transition hover:bg-[var(--surface)]"
+                aria-label="Decrease quantity"
+              >
+                −
+              </button>
+
+              <span className="flex h-11 w-12 items-center justify-center border-x border-[var(--border)] font-black">
+                {qty}
+              </span>
+
+              <button
+                onClick={() => setQty((q) => q + 1)}
+                className="flex h-11 w-11 items-center justify-center text-xl font-black transition hover:bg-[var(--surface)]"
+                aria-label="Increase quantity"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          {/* Add To Cart */}
+          <button
+            onClick={handleAddToCart}
+            className="mt-8 w-full bg-[var(--gold)] px-6 py-4 font-black text-black transition-all duration-300 hover:opacity-90 hover:shadow-[5px_5px_0_#000]"
+          >
+            {added ? "ADDED TO CART ✓" : "ADD TO CART"}
+          </button>
+
+          {/* Wishlist */}
+          <button
+            onClick={() => toggleWishlist(product)}
+            className={`mt-3 w-full border px-6 py-4 font-black transition-all duration-300 ${
+              wishlisted
+                ? "border-[var(--red)] bg-[var(--red)] text-white"
+                : "border-[var(--gold)] text-[var(--gold)] hover:bg-[var(--gold)] hover:text-black"
+            }`}
+          >
+            {wishlisted
+              ? "♥ REMOVE FROM WISHLIST"
+              : "♡ ADD TO WISHLIST"}
+          </button>
+
+          {/* Continue Shopping */}
+          <Link
+            to="/shop"
+            className="mt-5 block text-center text-sm font-bold text-[var(--gold)] hover:underline"
+          >
+            ← CONTINUE SHOPPING
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
 }
