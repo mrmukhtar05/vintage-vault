@@ -17,7 +17,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Orders from "./pages/Orders";
-import Admin from "./pages/Admin";
+import Admin from "./admin/Admin";
 import NotFound from "./pages/NotFound";
 
 export default function App() {
@@ -42,7 +42,7 @@ export default function App() {
                       <Route path="/register" element={<Register />} />
                       <Route path="/profile" element={<Profile />} />
                       <Route path="/orders" element={<Orders />} />
-                      <Route path="/admin" element={<Admin />} />
+                      <Route path="/admin/*" element={<Admin />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </MainLayout>
