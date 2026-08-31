@@ -1,13 +1,20 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 const WishlistContext = createContext(null);
+
 const STORAGE_KEY = "vv_wishlist";
 
 function loadWishlist() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
+
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw);
+
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error("Wishlist load error:", error);
     return [];
   }
 }
@@ -15,27 +22,76 @@ function loadWishlist() {
 export function WishlistProvider({ children }) {
   const [wishlist, setWishlist] = useState(loadWishlist);
 
+  // Save wishlist
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(wishlist));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(wishlist)
+    );
   }, [wishlist]);
 
-  const isWishlisted = (id) => wishlist.some((p) => p.id === id);
-
-  const toggleWishlist = (product) => {
-    setWishlist((prev) =>
-      prev.some((p) => p.id === product.id)
-        ? prev.filter((p) => p.id !== product.id)
-        : [...prev, product]
+  // =========================
+  // CHECK WISHLIST
+  // =========================
+  const isWishlisted = (id) => {
+    return wishlist.some(
+      (product) =>
+        String(product._id) === String(id)
     );
   };
 
+  // =========================
+  // ADD / REMOVE
+  // =========================
+  const toggleWishlist = (product) => {
+    if (!product?._id) {
+      console.error(
+        "Product ID missing:",
+        product
+      );
+      return;
+    }
+
+    setWishlist((prev) => {
+      const exists = prev.some(
+        (item) =>
+          String(item._id) ===
+          String(product._id)
+      );
+
+      if (exists) {
+        return prev.filter(
+          (item) =>
+            String(item._id) !==
+            String(product._id)
+        );
+      }
+
+      return [...prev, product];
+    });
+  };
+
+  // =========================
+  // REMOVE
+  // =========================
   const removeFromWishlist = (id) => {
-    setWishlist((prev) => prev.filter((p) => p.id !== id));
+    setWishlist((prev) =>
+      prev.filter(
+        (product) =>
+          String(product._id) !== String(id)
+      )
+    );
   };
 
   return (
     <WishlistContext.Provider
-      value={{ wishlist, toggleWishlist, isWishlisted, removeFromWishlist, wishlistCount: wishlist.length }}
+      value={{
+        wishlist,
+        toggleWishlist,
+        isWishlisted,
+        removeFromWishlist,
+        wishlistCount: wishlist.length,
+      }}
     >
       {children}
     </WishlistContext.Provider>
@@ -44,6 +100,12 @@ export function WishlistProvider({ children }) {
 
 export function useWishlist() {
   const ctx = useContext(WishlistContext);
-  if (!ctx) throw new Error("useWishlist must be used inside WishlistProvider");
+
+  if (!ctx) {
+    throw new Error(
+      "useWishlist must be used inside WishlistProvider"
+    );
+  }
+
   return ctx;
 }

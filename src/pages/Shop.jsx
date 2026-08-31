@@ -1,29 +1,42 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PageHeader from "../components/PageHeader";
 import ProductCard from "../components/ProductCard";
 import { useProducts } from "../context/ProductsContext";
+import api from "../api/api";
 
 export default function Shop() {
   const { products, loading, error } = useProducts();
-  const [category, setCategory] = useState("All");
 
-  const categories = [
-    "All",
-    "T-Shirts",
-    "Jackets",
-    "Jerseys",
-    "Bottoms",
-    "Jorts",
-    "Hoodies",
-  ];
+  const [category, setCategory] = useState("All");
+  const [categories, setCategories] = useState([]);
+  const [categoryLoading, setCategoryLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoryLoading(true);
+
+        const response = await api.get("/categories");
+
+        if (response.data?.success) {
+          setCategories(response.data.categories || []);
+        }
+      } catch (err) {
+        console.error("Fetch categories error:", err);
+      } finally {
+        setCategoryLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const filtered =
     category === "All"
       ? products
       : products.filter(
-          (p) =>
-            p.category?.name?.toLowerCase() ===
-            category.toLowerCase()
+          (product) =>
+            product.category?._id === category
         );
 
   return (
@@ -34,21 +47,34 @@ export default function Shop() {
       />
 
       <main className="mx-auto w-full px-5 py-10">
+
         {/* Categories */}
         <div className="mb-8 flex flex-wrap gap-2">
-          {categories.map((c) => (
-            <button
-              key={c}
-              onClick={() => setCategory(c)}
-              className={`px-4 py-2 text-xs font-black ${
-                category === c
-                  ? "bg-[var(--gold)] text-black"
-                  : "border border-[var(--border)]"
-              }`}
-            >
-              {c}
-            </button>
-          ))}
+          <button
+            onClick={() => setCategory("All")}
+            className={`px-4 py-2 text-xs font-black ${
+              category === "All"
+                ? "bg-[var(--gold)] text-black"
+                : "border border-[var(--border)]"
+            }`}
+          >
+            All
+          </button>
+
+          {!categoryLoading &&
+            categories.map((item) => (
+              <button
+                key={item._id}
+                onClick={() => setCategory(item._id)}
+                className={`px-4 py-2 text-xs font-black ${
+                  category === item._id
+                    ? "bg-[var(--gold)] text-black"
+                    : "border border-[var(--border)]"
+                }`}
+              >
+                {item.name}
+              </button>
+            ))}
         </div>
 
         {/* Loading */}
@@ -66,25 +92,29 @@ export default function Shop() {
         )}
 
         {/* Empty */}
-        {!loading && !error && filtered.length === 0 && (
-          <div className="py-20 text-center">
-            <h2 className="text-2xl font-black">
-              NO PRODUCTS FOUND
-            </h2>
-          </div>
-        )}
+        {!loading &&
+          !error &&
+          filtered.length === 0 && (
+            <div className="py-20 text-center">
+              <h2 className="text-2xl font-black">
+                NO PRODUCTS FOUND
+              </h2>
+            </div>
+          )}
 
         {/* Products */}
-        {!loading && !error && filtered.length > 0 && (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {filtered.map((product) => (
-              <ProductCard
-                key={product._id}
-                product={product}
-              />
-            ))}
-          </div>
-        )}
+        {!loading &&
+          !error &&
+          filtered.length > 0 && (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              {filtered.map((product) => (
+                <ProductCard
+                  key={product._id}
+                  product={product}
+                />
+              ))}
+            </div>
+          )}
       </main>
     </>
   );

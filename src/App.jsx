@@ -19,6 +19,7 @@ import Profile from "./pages/Profile";
 import Orders from "./pages/Orders";
 import Admin from "./admin/Admin";
 import NotFound from "./pages/NotFound";
+import Contact from "./pages/Contact";
 
 export default function App() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
                       <Route path="/orders" element={<Orders />} />
                       <Route path="/admin/*" element={<Admin />} />
                       <Route path="*" element={<NotFound />} />
+                      <Route path="/contact" element={<Contact />} />
                     </Routes>
                   </MainLayout>
                 </OrdersProvider>
