@@ -5,12 +5,23 @@ import { useAuth } from "../context/AuthContext";
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
+
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -19,22 +30,32 @@ export default function Login() {
       return;
     }
 
-    const result = login(form);
-    if (!result.success) {
-      setError(result.error);
-      return;
+    try {
+      setLoading(true);
+
+      const result = await login(form);
+
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+
+      navigate("/profile");
+    } finally {
+      setLoading(false);
     }
-    navigate("/profile");
   };
 
   return (
     <main className="mx-auto max-w-md px-5 py-20">
       <h1 className="text-5xl font-black">LOGIN</h1>
+
       {error && (
         <p className="mt-4 border border-[var(--red)] bg-[var(--red)]/10 px-4 py-3 text-sm text-[var(--red)]">
           {error}
         </p>
       )}
+
       <form onSubmit={handleSubmit} className="mt-8 grid gap-4">
         <input
           name="email"
@@ -44,6 +65,7 @@ export default function Login() {
           className="bg-[var(--surface)] p-4 outline-none"
           placeholder="Email"
         />
+
         <input
           name="password"
           type="password"
@@ -52,12 +74,21 @@ export default function Login() {
           className="bg-[var(--surface)] p-4 outline-none"
           placeholder="Password"
         />
-        <button type="submit" className="bg-[var(--gold)] p-4 font-black text-black hover:opacity-90">
-          LOGIN
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-[var(--gold)] p-4 font-black text-black hover:opacity-90 disabled:opacity-50"
+        >
+          {loading ? "LOGGING IN..." : "LOGIN"}
         </button>
       </form>
+
       <p className="mt-6 text-sm text-[var(--muted)]">
-        New here? <Link className="text-[var(--gold)]" to="/register">Create account</Link>
+        New here?{" "}
+        <Link className="text-[var(--gold)]" to="/register">
+          Create account
+        </Link>
       </p>
     </main>
   );

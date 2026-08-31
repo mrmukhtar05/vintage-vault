@@ -1,85 +1,169 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import api from "../api/api";
 
 const AuthContext = createContext(null);
-const USERS_KEY = "vv_users";
-const SESSION_KEY = "vv_current_user";
 
-function loadUsers() {
-  try {
-    const raw = localStorage.getItem(USERS_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {
-    // fall through to seeding
-  }
-  // Seed a default admin account on first run so the dashboard is reachable.
-  const seeded = [
-    { name: "Admin", email: "admin@vintagevault.com", password: "admin123", role: "admin" },
-  ];
-  localStorage.setItem(USERS_KEY, JSON.stringify(seeded));
-  return seeded;
-}
-
-function loadSession() {
-  try {
-    const raw = localStorage.getItem(SESSION_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-// NOTE: This is a frontend-only mock auth system for demo purposes.
-// Passwords are stored in plain text in localStorage — do NOT use this
-// pattern in a real production app. Replace with a real backend + hashed
-// passwords + secure sessions when this project gets an API.
+const TOKEN_KEY = "token";
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(loadSession);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+  // Check existing login when app starts
   useEffect(() => {
-    if (user) localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-    else localStorage.removeItem(SESSION_KEY);
-  }, [user]);
+    const token = localStorage.getItem(TOKEN_KEY);
 
-  const register = ({ name, email, password }) => {
-    const users = loadUsers();
-    if (users.some((u) => u.email.toLowerCase() === email.toLowerCase())) {
-      return { success: false, error: "An account with this email already exists." };
+    if (!token) {
+      setLoading(false);
+      return;
     }
-    const newUser = { name, email, password, role: "customer" };
-    localStorage.setItem(USERS_KEY, JSON.stringify([...users, newUser]));
-    setUser({ name, email, role: "customer" });
-    return { success: true };
+
+    api
+      .get("/auth/profile")
+      .then((response) => {
+        if (response.data?.success) {
+          setUser(response.data.user);
+        }
+      })
+      .catch(() => {
+        localStorage.removeItem(TOKEN_KEY);
+        setUser(null);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  // REGISTER
+  const register = async ({ name, email, password, phone = "" }) => {
+    try {
+      const response = await api.post("/auth/register", {
+        name,
+        email,
+        password,
+        phone,
+      });
+
+      const { token, user } = response.data;
+
+      localStorage.setItem(TOKEN_KEY, token);
+      setUser(user);
+
+      return {
+        success: true,
+        user,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error.response?.data?.message ||
+          "Registration failed. Please try again.",
+      };
+    }
   };
 
-  const login = ({ email, password }) => {
-    const users = loadUsers();
-    const found = users.find(
-      (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
-    );
-    if (!found) {
-      return { success: false, error: "Invalid email or password." };
+  // LOGIN
+  const login = async ({ email, password }) => {
+    try {
+      const response = await api.post("/auth/login", {
+        email,
+        password,
+      });
+
+      const { token, user } = response.data;
+
+      localStorage.setItem(TOKEN_KEY, token);
+      setUser(user);
+
+      return {
+        success: true,
+        user,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error.response?.data?.message ||
+          "Invalid email or password.",
+      };
     }
-    setUser({ name: found.name, email: found.email, role: found.role || "customer" });
-    return { success: true };
   };
 
-  const logout = () => setUser(null);
+  // LOGOUT
+  const logout = async () => {
+    try {
+      await api.post("/auth/logout");
+    } catch {
+      // Even if backend logout fails, clear local session
+    }
 
-  const getUserCount = () => loadUsers().length;
+    localStorage.removeItem(TOKEN_KEY);
+    setUser(null);
+  };
+
+  // UPDATE PROFILE
+  const updateProfile = async (data) => {
+    try {
+      const response = await api.put("/auth/profile", data);
+
+      if (response.data?.success) {
+        setUser(response.data.user);
+      }
+
+      return {
+        success: true,
+        user: response.data.user,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error.response?.data?.message ||
+          "Unable to update profile.",
+      };
+    }
+  };
+
+  // GET CURRENT PROFILE
+  const getProfile = async () => {
+    try {
+      const response = await api.get("/auth/profile");
+
+      if (response.data?.success) {
+        setUser(response.data.user);
+      }
+
+      return {
+        success: true,
+        user: response.data.user,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error.response?.data?.message ||
+          "Unable to load profile.",
+      };
+    }
+  };
+
+  const value = {
+    user,
+    loading,
+    isAuthenticated: !!user,
+    isAdmin: user?.role === "admin",
+
+    register,
+    login,
+    logout,
+
+    updateProfile,
+    getProfile,
+  };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated: !!user,
-        isAdmin: user?.role === "admin",
-        register,
-        login,
-        logout,
-        getUserCount,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
@@ -87,6 +171,10 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+
+  if (!ctx) {
+    throw new Error("useAuth must be used inside AuthProvider");
+  }
+
   return ctx;
 }

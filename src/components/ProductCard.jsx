@@ -4,7 +4,10 @@ import ImageSlider from "./ImageSlider";
 
 export default function ProductCard({ product, onWishlist }) {
   const { toggleWishlist, isWishlisted } = useWishlist();
-  const wishlisted = isWishlisted(product.id);
+
+  const productId = product._id;
+
+  const wishlisted = isWishlisted(productId);
 
   const handleWishlist = (e) => {
     e.preventDefault();
@@ -30,16 +33,15 @@ export default function ProductCard({ product, onWishlist }) {
         hover:shadow-[8px_8px_0_#e9a91a]
       "
     >
-      <Link to={`/product/${product.id}`} className="block">
-        {/* Product Image — aspect-ratio instead of fixed px height so it
-            scales cleanly with the grid column width on any screen size */}
+      <Link to={`/product/${productId}`} className="block">
+        {/* Product Image */}
         <div className="relative aspect-[4/5] w-full overflow-hidden">
           <ImageSlider
-            images={product.images}
+            images={product.images || []}
             emojiSize="text-[min(28vw,130px)] drop-shadow-[0_15px_15px_rgba(0,0,0,0.5)] transition-all duration-700 ease-out group-hover:scale-125 group-hover:-rotate-3"
           />
 
-          {/* Shine Animation */}
+          {/* Shine */}
           <div
             className="
               pointer-events-none
@@ -61,7 +63,11 @@ export default function ProductCard({ product, onWishlist }) {
           <button
             type="button"
             onClick={handleWishlist}
-            aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+            aria-label={
+              wishlisted
+                ? `Remove ${product.name} from wishlist`
+                : `Add ${product.name} to wishlist`
+            }
             className={`
               absolute
               right-4
@@ -77,7 +83,11 @@ export default function ProductCard({ product, onWishlist }) {
               transition-all
               duration-300
               hover:scale-110
-              ${wishlisted ? "bg-[var(--red)] text-white" : "bg-black/50 text-white hover:bg-[var(--red)]"}
+              ${
+                wishlisted
+                  ? "bg-[var(--red)] text-white"
+                  : "bg-black/50 text-white hover:bg-[var(--red)]"
+              }
             `}
           >
             {wishlisted ? "♥" : "♡"}
@@ -123,7 +133,7 @@ export default function ProductCard({ product, onWishlist }) {
               text-gray-500
             "
           >
-            {product.category}
+            {product.category?.name || "Vintage"}
           </p>
 
           {/* Product Name */}
@@ -135,7 +145,7 @@ export default function ProductCard({ product, onWishlist }) {
               font-black
               transition-colors
               duration-300
-              group-hover:text-[#c88b12]
+              group-hover:text-[#c88b0b]
               sm:text-xl
             "
           >
@@ -148,9 +158,11 @@ export default function ProductCard({ product, onWishlist }) {
               ₹{product.price}
             </span>
 
-            <span className="text-sm text-gray-400 line-through">
-              ₹{product.oldPrice}
-            </span>
+            {product.oldPrice && (
+              <span className="text-sm text-gray-400 line-through">
+                ₹{product.oldPrice}
+              </span>
+            )}
           </div>
         </div>
       </Link>
